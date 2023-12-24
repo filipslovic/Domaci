@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Web programiranje</title>
+  <style>
+    table {
+      width: 60%;
+      border-collapse: collapse;
+      
+    }
+    th, td {
+      border: none;
+      padding: 8px;
+      text-align: left;
+    }
+    #totalSum {
+      font-weight: bold;
+    }
+
+    .polja {
+      display: flex;
+      align-items: flex-start;
+      padding-left: 10px;
+      padding-right: 10px;
+      
+    }
+    
+    .suma
+    {
+      padding-left: 50px;
+      padding-right: 20px; 
+    }
+    
+    
+
+    
+
+  </style>
+</head>
+<body>
+
+<table id="products">
+  <tr>
+    <th>Naziv</th>
+    <th>Cena</th>
+    <th>Količina</th>
+    <th>Ukupna Cena</th>
+  </tr>
+</table>
+
+<div class="polja">
+  <input type="text" id="newProductName" placeholder="Naziv novog proizvoda">
+  <input type="number" id="newProductPrice" placeholder="Cena">
+  <input type="number" id="newProductQuantity" placeholder="Količina">
+  <div class="suma">
+    <p id="totalSum"></p>
+  </div>
+  <div class="dugme">
+    <button onclick="addNewProduct()">Dodaj proizvod</button>
+  </div>
+  
+  
+</div>
+
+<script>
+  var items = [ { "naziv" : "Chair", "komada": 1, "cena": 233 }, { "naziv" : "Car", "komada": 3, "cena": 324 }, { "naziv" : "Computer", "komada": 2, "cena": 319 }, { "naziv" : "Chair", "komada": 3, "cena": 405 }, { "naziv" : "Pizza", "komada": 3, "cena": 121 }, { "naziv" : "Chips", "komada": 3, "cena": 58 }, { "naziv" : "Table", "komada": 2, "cena": 324 }, { "naziv" : "Sausages", "komada": 3, "cena": 204 }, { "naziv" : "Pants", "komada": 3, "cena": 335 }, { "naziv" : "Table", "komada": 1, "cena": 350 } ]
+
+
+  function generateProductTable() {
+    var table = document.getElementById('products');
+
+    items.forEach(function(item) {
+      var row = table.insertRow();
+      var cellName = row.insertCell(0);
+      var cellPrice = row.insertCell(1);
+      var cellQuantity = row.insertCell(2);
+      var cellTotalPrice = row.insertCell(3);
+
+      cellName.textContent = item.naziv;
+      cellPrice.textContent = item.cena;
+
+      var quantityHTML = '<button onclick="decrementQuantity(' + items.indexOf(item) + ')">-</button>' +
+                         '<span id="quantity' + items.indexOf(item) + '">' + item.komada + '</span>' +
+                         '<button onclick="incrementQuantity(' + items.indexOf(item) + ')">+</button>';
+
+      cellQuantity.innerHTML = quantityHTML;
+      cellTotalPrice.textContent = item.komada * item.cena; // Postavljamo početnu vrednost ukupne cene
+      cellTotalPrice.setAttribute('id', 'totalPrice' + items.indexOf(item)); // Dodajemo ID za ukupnu cenu
+    });
+
+    calculateTotalSum(); // Pozivamo funkciju za računanje ukupne sume
+  }
+
+  // Funkcija za smanjenje količine
+  function decrementQuantity(index) {
+    if (items[index].komada > 0) {
+      items[index].komada--;
+      updateQuantity(index);
+      calculateTotalSum(); // Nakon izmene količine, ažuriramo ukupnu sumu
+    }
+  }
+
+  // Funkcija za povećanje količine
+  function incrementQuantity(index) {
+    items[index].komada++;
+    updateQuantity(index);
+    calculateTotalSum(); // Nakon izmene količine, ažuriramo ukupnu sumu
+  }
+
+  // Funkcija za ažuriranje količine i cene u tabeli
+  function updateQuantity(index) {
+    var quantityElement = document.getElementById('quantity' + index);
+    quantityElement.textContent = items[index].komada;
+
+    var priceElement = quantityElement.parentNode.nextElementSibling;
+    priceElement.textContent = items[index].komada * items[index].cena;
+
+    var totalPriceElement = document.getElementById('totalPrice' + index);
+    totalPriceElement.textContent = items[index].komada * items[index].cena; // Ažuriramo ukupnu cenu
+  }
+
+  // Funkcija za računanje ukupne sume svih cena
+  function calculateTotalSum() {
+    var totalSum = 0;
+    items.forEach(function(item) {
+      totalSum += item.komada * item.cena;
+    });
+
+    var totalSumElement = document.getElementById('totalSum');
+    totalSumElement.textContent = + totalSum;
+  }
+
+  function addNewProduct() {
+    var productName = document.getElementById('newProductName').value.trim();
+    var productPrice = parseInt(document.getElementById('newProductPrice').value);
+    var productQuantity = parseInt(document.getElementById('newProductQuantity').value);
+  
+    if (productName && !isNaN(productPrice) && !isNaN(productQuantity)) {
+      var exists = false;
+  
+      // Provera samo među već prikazanim proizvodima u tabeli
+      var existingProducts = document.querySelectorAll('#products tr td:first-child');
+      existingProducts.forEach(function(product) {
+        if (product.textContent.toLowerCase() === productName.toLowerCase()) {
+          exists = true;
+        }
+      });
+  
+      if (!exists) {
+        var newProduct = { "naziv": productName, "komada": productQuantity, "cena": productPrice };
+        items.push(newProduct);
+        clearInputs();
+        var table = document.getElementById('products');
+        // Pobrišem sve redove osim prvog (zaglavlja)
+        while (table.rows.length > 1) {
+          table.deleteRow(1);
+        }
+        generateProductTable();
+        calculateTotalSum();
+      } else {
+        alert("Proizvod sa istim imenom već postoji!");
+      }
+    } else {
+      alert("Unesite ispravne informacije za novi proizvod!");
+    }
+  }
+  
+  
+
+  function clearInputs() {
+    document.getElementById('newProductName').value = '';
+    document.getElementById('newProductPrice').value = '';
+    document.getElementById('newProductQuantity').value = '';
+  }
+
+  window.onload = generateProductTable;
+</script>
+
+</body>
+</html>
